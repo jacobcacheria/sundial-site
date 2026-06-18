@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Sundial — Share your day, ray by ray</title>
+<meta name="description" content="Sundial turns a shared note into something alive. Every line, time-stamped to the second, lands softly on each other's home screen, all day long. A home for two." />
+<link rel="icon" href="assets/icon.png" />
+<link rel="preconnect" href="https://api.fontshare.com" crossorigin />
+<link href="https://api.fontshare.com/v2/css?f[]=ranade@300,400,500,700&f[]=satoshi@400,500,700,900&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+<!-- ░░ ICON SPRITE (custom emoji set in the Sundial palette) ░░ -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="g-sun" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#F7D08A"/><stop offset="1" stop-color="#E07C3C"/>
+    </linearGradient>
+    <linearGradient id="g-warm" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F2B95C"/><stop offset="1" stop-color="#E07C3C"/>
+    </linearGradient>
+  </defs>
+  <symbol id="ic-sun" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="4.6" fill="url(#g-sun)"/>
+    <g stroke="#E07C3C" stroke-width="2" stroke-linecap="round">
+      <line x1="12" y1="1.7" x2="12" y2="4.2"/><line x1="12" y1="19.8" x2="12" y2="22.3"/>
+      <line x1="1.7" y1="12" x2="4.2" y2="12"/><line x1="19.8" y1="12" x2="22.3" y2="12"/>
+      <line x1="4.6" y1="4.6" x2="6.4" y2="6.4"/><line x1="17.6" y1="17.6" x2="19.4" y2="19.4"/>
+      <line x1="19.4" y1="4.6" x2="17.6" y2="6.4"/><line x1="6.4" y1="17.6" x2="4.6" y2="19.4"/>
+    </g>
+  </symbol>
+  <symbol id="ic-sunrise" viewBox="0 0 24 24">
+    <g stroke="#E07C3C" stroke-width="2" stroke-linecap="round">
+      <line x1="12" y1="2.5" x2="12" y2="4.8"/><line x1="4.3" y1="7.5" x2="5.9" y2="9.1"/><line x1="19.7" y1="7.5" x2="18.1" y2="9.1"/>
+    </g>
+    <path d="M5 17a7 7 0 0 1 14 0z" fill="url(#g-sun)"/>
+    <line x1="2.5" y1="20.5" x2="21.5" y2="20.5" stroke="#5A4534" stroke-width="2" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="ic-clock" viewBox="0 0 24 24">
+    <line x1="9.5" y1="2.6" x2="14.5" y2="2.6" stroke="#E07C3C" stroke-width="2" stroke-linecap="round"/>
+    <line x1="12" y1="2.6" x2="12" y2="5" stroke="#E07C3C" stroke-width="2" stroke-linecap="round"/>
+    <circle cx="12" cy="13.5" r="7.6" fill="url(#g-sun)" stroke="#E07C3C" stroke-width="1.4"/>
+    <path d="M12 13.5V9.2M12 13.5l3 1.9" stroke="#5A4534" stroke-width="2" stroke-linecap="round" fill="none"/>
+  </symbol>
+  <symbol id="ic-link" viewBox="0 0 24 24">
+    <g stroke="#E07C3C" stroke-width="2.3" fill="none" stroke-linecap="round">
+      <path d="M9.6 14.4l4.8-4.8"/>
+      <path d="M8.4 11.6 6.6 13.4a3.4 3.4 0 0 0 4.8 4.8l1.8-1.8"/>
+      <path d="M15.6 12.4l1.8-1.8a3.4 3.4 0 0 0-4.8-4.8l-1.8 1.8"/>
+    </g>
+  </symbol>
+  <symbol id="ic-lock" viewBox="0 0 24 24">
+    <path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" fill="none" stroke="#5A4534" stroke-width="2" stroke-linecap="round"/>
+    <rect x="4.8" y="10.3" width="14.4" height="10.4" rx="3.2" fill="url(#g-sun)" stroke="#E07C3C" stroke-width="1.3"/>
+    <circle cx="12" cy="15" r="1.5" fill="#5A4534"/><line x1="12" y1="15.5" x2="12" y2="17.6" stroke="#5A4534" stroke-width="2" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="ic-heart" viewBox="0 0 24 24">
+    <path d="M12 20.6S3.6 15.3 3.6 9.6A4.4 4.4 0 0 1 12 7.2a4.4 4.4 0 0 1 8.4 2.4c0 5.7-8.4 11-8.4 11z" fill="url(#g-warm)"/>
+  </symbol>
+  <symbol id="ic-beam" viewBox="0 0 24 24">
+    <circle cx="6" cy="12" r="3" fill="url(#g-warm)"/><circle cx="18" cy="12" r="3" fill="url(#g-warm)"/>
+    <path d="M9 12h6" stroke="#E07C3C" stroke-width="2" stroke-linecap="round" stroke-dasharray="0.1 3.4"/>
+  </symbol>
+</svg>
+
+<!-- ░░ NAV ░░ -->
+<header class="nav" id="nav">
+  <a class="nav__brand" href="#top">
+    <img src="assets/icon.png" alt="Sundial" class="nav__icon" />
+    <span>Sundial</span>
+  </a>
+  <nav class="nav__links">
+    <a href="#what">What it is</a>
+    <a href="#features">Features</a>
+    <a href="#how">How it works</a>
+    <a href="#story">Story</a>
+  </nav>
+  <a href="#get" class="btn btn--small btn--sun"><span>Get early access</span></a>
+</header>
+
+<!-- ░░ HERO ░░ -->
+<section class="hero" id="top">
+  <div class="hero__fx" id="strands"></div>
+  <div class="hero__veil"></div>
+  <div class="hero__inner reveal">
+    <span class="eyebrow">A home for two <svg class="ic ic--sm"><use href="#ic-sun"/></svg></span>
+    <h1 class="hero__title">Your whole day,<br/><em>shared ray by ray.</em></h1>
+    <p class="hero__sub">Sundial turns one shared note into something alive. Every line you write, time-stamped to the second, lands softly on each other's home screen. All day long.</p>
+    <div class="hero__cta">
+      <a href="https://testflight.apple.com/join/xXKMhKmd" target="_blank" rel="noopener" class="btn btn--glow btn--sun"><span>Join the beta</span></a>
+      <a href="#how" class="btn btn--ghost">See how it works →</a>
+    </div>
+    <div class="hero__meta">
+      <span>iOS 17+</span><i></i><span>Sign in with Apple</span><i></i><span>Private by design</span>
+    </div>
+  </div>
+  <div class="scroll-hint" aria-hidden="true"><span></span></div>
+</section>
+
+<!-- ░░ MARQUEE ░░ -->
+<div class="marquee" aria-hidden="true">
+  <div class="marquee__track">
+    <span>look outside</span><b>·</b><span>almost home</span><b>·</b><span>ray by ray</span><b>·</b><span>good morning my love</span><b>·</b><span>sunset tonight on the beach?</span><b>·</b><span>i found a new miata for you</span><b>·</b><span>6:21:07</span><b>·</b><span>can we have a sleep over tonight</span><b>·</b>
+    <span>look outside</span><b>·</b><span>almost home</span><b>·</b><span>ray by ray</span><b>·</b><span>good morning my love</span><b>·</b><span>sunset tonight on the beach?</span><b>·</b><span>i found a new miata for you</span><b>·</b><span>6:21:07</span><b>·</b><span>can we have a sleep over tonight</span><b>·</b>
+  </div>
+</div>
+
+<!-- ░░ WHAT IT IS ░░ -->
+<section class="section what" id="what">
+  <div class="container">
+    <p class="kicker reveal">Not a chat app. A shared sky.</p>
+    <h2 class="section__title reveal">One note. Two people.<br/>A day that writes itself.</h2>
+    <p class="lead reveal">Most messaging is a firehose. Sundial is the opposite: a single, calm page the two of you share. You jot a line, it stamps the moment, and it glows on their home screen without anyone opening anything. At midnight the page turns, and yesterday becomes a little sun in your solar system.</p>
+    <div class="pillars">
+      <div class="pillar reveal"><span class="pillar__num">01</span><h3>Write a line</h3><p>Type a thought. Sundial marks it <code>h:mm:ss</code>, automatically.</p></div>
+      <div class="pillar reveal"><span class="pillar__num">02</span><h3>It lands softly</h3><p>Your ray appears on their widget, no notification noise, just warmth.</p></div>
+      <div class="pillar reveal"><span class="pillar__num">03</span><h3>The day keeps itself</h3><p>At midnight your Day archives into your Solar System. Tomorrow starts blank.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ░░ FEATURES ░░ -->
+<section class="section features" id="features">
+  <div class="container">
+    <p class="kicker reveal">Small details, warmly engineered.</p>
+    <h2 class="section__title reveal">Everything a day between two people needs.</h2>
+    <div class="grid" id="featureGrid">
+      <article class="glow-card reveal" data-glow>
+        <div class="glow-card__inner">
+          <div class="ficon"><svg class="ic"><use href="#ic-clock"/></svg></div>
+          <h3>Time-stamped to the second</h3>
+          <p>Every line marks the moment it happened, <code>h:mm:ss</code>, no taps required. Scroll back and feel the shape of a whole day.</p>
+        </div>
+      </article>
+      <article class="glow-card reveal" data-glow>
+        <div class="glow-card__inner">
+          <div class="ficon"><svg class="ic"><use href="#ic-sunrise"/></svg></div>
+          <h3>A fresh page each day</h3>
+          <p>At midnight your Day folds into your <em>Solar System</em>, a gentle archive of every day you've shared. Tomorrow opens clean.</p>
+        </div>
+      </article>
+      <article class="glow-card reveal" data-glow>
+        <div class="glow-card__inner">
+          <div class="ficon"><svg class="ic"><use href="#ic-sun"/></svg></div>
+          <h3>Live on your home screen</h3>
+          <p>A widget that glows with their latest rays. You feel them in your day without ever unlocking your phone.</p>
+        </div>
+      </article>
+      <article class="glow-card reveal" data-glow>
+        <div class="glow-card__inner">
+          <div class="ficon"><svg class="ic"><use href="#ic-beam"/></svg></div>
+          <h3>One Beam, just the two of you</h3>
+          <p>Pair once with a six-letter Beam code. From then on it's a private channel between two phones, and only two.</p>
+        </div>
+      </article>
+      <article class="glow-card reveal" data-glow>
+        <div class="glow-card__inner">
+          <div class="ficon"><svg class="ic"><use href="#ic-lock"/></svg></div>
+          <h3>Private by design</h3>
+          <p>Sign in with Apple, no passwords, no email harvested, no ads, nothing sold. Your words are yours.</p>
+        </div>
+      </article>
+      <article class="glow-card reveal" data-glow>
+        <div class="glow-card__inner">
+          <div class="ficon"><svg class="ic"><use href="#ic-heart"/></svg></div>
+          <h3>Built to feel like golden hour</h3>
+          <p>Warm light, soft type, a little sun on every screen. Sundial is designed to feel like the best part of the afternoon.</p>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ░░ SHOWCASE ░░ -->
+<section class="section showcase" id="showcase">
+  <div class="container showcase__grid">
+    <div class="showcase__copy reveal">
+      <p class="kicker">On your screen, all day.</p>
+      <h2 class="section__title">It looks like the<br/>afternoon feels.</h2>
+      <p class="lead">Sundial lives where you already look a hundred times a day. Open the app and the whole day unfolds, line by line, the same shared note alive on both your phones.</p>
+      <ul class="ticks">
+        <li>A composer that gets out of the way</li>
+        <li>Two-tone rays, theirs warm, yours cool</li>
+        <li>A Solar System of every day you've kept</li>
+      </ul>
+    </div>
+    <div class="showcase__phones reveal">
+      <!-- Phone: Today -->
+      <div class="phone phone--front">
+        <div class="phone__notch"></div>
+        <div class="phone__screen app">
+          <div class="app__glow"></div>
+          <div class="app__head"><svg class="ic ic--sm"><use href="#ic-sun"/></svg><span>Today's Rays</span></div>
+          <div class="ray ray--them"><span class="ray__t">7:14:02</span><p>morning, sunshine <svg class="ic ic--xs"><use href="#ic-sun"/></svg></p></div>
+          <div class="ray ray--me"><span class="ray__t">7:15:38</span><p>morning you, making matcha now</p></div>
+          <div class="ray ray--them"><span class="ray__t">12:31:09</span><p>let's watch a movie tonight</p></div>
+          <div class="ray ray--me"><span class="ray__t">5:48:50</span><p>yes! almost home, look west 🌇</p></div>
+          <div class="app__composer"><span>write a ray…</span><i>＋</i></div>
+        </div>
+      </div>
+      <!-- Phone: the partner's view of the same shared day (mirrors the front phone), in night mode -->
+      <div class="phone phone--back">
+        <div class="phone__screen app app--dark">
+          <div class="app__glow"></div>
+          <div class="app__head"><svg class="ic ic--sm"><use href="#ic-sun"/></svg><span>Today's Rays</span></div>
+          <div class="ray ray--me"><span class="ray__t">7:14:02</span><p>morning, sunshine <svg class="ic ic--xs"><use href="#ic-sun"/></svg></p></div>
+          <div class="ray ray--them"><span class="ray__t">7:15:38</span><p>morning you, making matcha now</p></div>
+          <div class="ray ray--me"><span class="ray__t">12:31:09</span><p>let's watch a movie tonight</p></div>
+          <div class="ray ray--them"><span class="ray__t">5:48:50</span><p>yes! almost home, look west 🌇</p></div>
+          <div class="app__composer"><span>write a ray…</span><i>＋</i></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ░░ HOW IT WORKS ░░ -->
+<section class="section how" id="how">
+  <div class="container">
+    <p class="kicker reveal">Sixty seconds to set up. Forever to use.</p>
+    <h2 class="section__title reveal">How it works</h2>
+    <div class="steps">
+      <div class="step reveal"><span class="step__n">1</span><h3>Sign in with Apple</h3><p>One tap. No password, no email, just you.</p></div>
+      <div class="step__line reveal"></div>
+      <div class="step reveal"><span class="step__n">2</span><h3>Open a Beam</h3><p>Get a six-letter code, send it to your person. They tap join.</p></div>
+      <div class="step__line reveal"></div>
+      <div class="step reveal"><span class="step__n">3</span><h3>Share your day</h3><p>Write your first ray. Watch it land on their home screen.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ░░ STORY ░░ -->
+<section class="section story" id="story">
+  <div class="story__fx" id="aurora"></div>
+  <div class="container story__inner reveal">
+    <p class="kicker">The brief</p>
+    <h2 class="section__title">Build the feeling of<br/>passing notes in class,<br/>for two people who grew up.</h2>
+    <p class="lead">Sundial began with a simple ask: make distance feel smaller without adding more noise. No likes, no last-seen, no pressure to reply. Just a warm shared page that quietly fills with a day, and a sun on the home screen to remind you someone's thinking of you.</p>
+    <p class="signature">Designed &amp; built for couples who'd rather share a sunset than a feed.</p>
+  </div>
+</section>
+
+<!-- ░░ GET / CTA ░░ -->
+<section class="section get" id="get">
+  <div class="container get__inner reveal">
+    <img src="assets/icon.png" alt="" class="get__icon" />
+    <h2 class="get__title">Sundial is in private beta.</h2>
+    <p class="lead">Be one of the first two-somes on it. Join the TestFlight and start sharing your day, ray by ray.</p>
+    <div class="get__cta">
+      <a href="https://testflight.apple.com/join/xXKMhKmd" target="_blank" rel="noopener" class="btn btn--glow btn--lg btn--sun"><span>Join the TestFlight</span></a>
+      <a href="#" class="btn btn--ghost js-privacy">Privacy policy</a>
+    </div>
+    <p class="fineprint">iPhone · iOS 17 or later</p>
+  </div>
+</section>
+
+<!-- ░░ FOOTER ░░ -->
+<footer class="footer">
+  <div class="container footer__inner">
+    <div class="footer__brand"><img src="assets/icon.png" alt="" /><span>Sundial</span></div>
+    <div class="footer__links">
+      <a href="#what">What it is</a>
+      <a href="#features">Features</a>
+      <a href="#how">How it works</a>
+      <a href="#" class="js-privacy">Privacy</a>
+      <a href="mailto:sundialskeeper@yahoo.com">Contact</a>
+    </div>
+    <p class="footer__copy">© 2026 Sundial. Made with sunlight.</p>
+  </div>
+</footer>
+
+<!-- ░░ PRIVACY MODAL ░░ -->
+<div class="modal" id="privacyModal" hidden>
+  <div class="modal__overlay" data-close></div>
+  <div class="modal__card" role="dialog" aria-modal="true" aria-label="Privacy Policy">
+    <button class="modal__close" data-close aria-label="Close">×</button>
+    <div class="modal__body">
+      <h2>Sundial — Privacy Policy</h2>
+      <p class="modal__date"><strong>Effective date:</strong> June 17, 2026</p>
+      <p>Sundial is a small app for two people to share a daily note: little timestamped messages that sync between your two paired phones. This policy explains, in plain language, what Sundial collects, why, and your choices. We keep it minimal on purpose.</p>
+      <h3>Who we are</h3>
+      <p>Sundial is made by Jacob Cacheria ("we," "us"). You can reach us at <strong>sundialskeeper@yahoo.com</strong>.</p>
+      <h3>What we collect</h3>
+      <p>We only collect what the app needs to work:</p>
+      <ul>
+        <li><strong>Sign in with Apple identifier.</strong> When you sign in, Apple gives us a unique ID for your account. We use it to recognize you and connect you to your shared notes. We do <strong>not</strong> receive or store your email address. Sign in with Apple keeps that private.</li>
+        <li><strong>Your name and your partner's name.</strong> The names you type during setup, so each of you can see who wrote what.</li>
+        <li><strong>Your notes ("rays").</strong> The text you write and the time you wrote it. These are shared with the one partner you pair with.</li>
+        <li><strong>Pairing information.</strong> A temporary invite code and a record of which two accounts are paired (your "Beam").</li>
+      </ul>
+      <p>We do <strong>not</strong> collect your contacts, location, photos, browsing activity, advertising identifiers, or analytics about how you use the app. We do <strong>not</strong> show ads. We do <strong>not</strong> sell your data, ever.</p>
+      <h3>How your information is used</h3>
+      <ul>
+        <li>To <strong>sync your shared note</strong> between your phone and your partner's phone.</li>
+        <li>To <strong>show names</strong> next to each message.</li>
+        <li>To <strong>pair</strong> the two of you and keep your notes private to your Beam.</li>
+      </ul>
+      <h3>Where it's stored</h3>
+      <p>Your account and notes are stored using <strong>Google Firebase</strong> (Authentication and Cloud Firestore), a cloud service run by Google. Data is encrypted in transit (HTTPS/TLS) and protected by security rules so that <strong>only you and your paired partner can read your notes</strong>. Sign-in is handled by <strong>Apple</strong>.</p>
+      <p>These providers process data on our behalf:</p>
+      <ul>
+        <li><strong>Apple</strong> — Sign in with Apple (<a href="https://www.apple.com/legal/privacy/" target="_blank" rel="noopener">Apple's Privacy Policy</a>).</li>
+        <li><strong>Google Firebase</strong> — account and note storage (<a href="https://firebase.google.com/support/privacy" target="_blank" rel="noopener">Firebase Privacy &amp; Security</a>).</li>
+      </ul>
+      <h3>Who can see your notes</h3>
+      <p>Only <strong>you and the single partner you pair with.</strong> Notes are not visible to other users, and they are not shared with anyone outside the providers listed above (who only store the data so the app can function).</p>
+      <h3>Keeping or deleting your data</h3>
+      <ul>
+        <li>You can <strong>leave a Beam</strong> at any time in the app, which disconnects you from your partner.</li>
+        <li>To <strong>delete your account and associated data</strong>, email us at <strong>sundialskeeper@yahoo.com</strong> and we'll remove it.</li>
+      </ul>
+      <h3>Children</h3>
+      <p>Sundial is not directed to children under 13, and we do not knowingly collect data from them.</p>
+      <h3>Changes to this policy</h3>
+      <p>If we update this policy, we'll change the "Effective date" above and post the new version here.</p>
+      <h3>Contact</h3>
+      <p>Questions? Email <strong>sundialskeeper@yahoo.com</strong>.</p>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="js/effects.js"></script>
+</body>
+</html>
