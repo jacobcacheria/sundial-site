@@ -108,7 +108,7 @@ function initAurora(ctn){
   const stops = ['#F97316','#EAB308','#F97316'].map(h=>{ const c=new Color(h); return [c.r,c.g,c.b]; });
   mountGL(ctn, AURORA_FRAG, {
     uTime:{value:0}, uAmplitude:{value:1.0}, uColorStops:{value:stops}, uResolution:{value:[1,1]}, uBlend:{value:0.48}
-  }, (p,t)=>{ p.uniforms.uTime.value = (t*0.01)*0.5*0.1; });
+  }, (p,t)=>{ p.uniforms.uTime.value = (t*0.01)*0.75*0.1; });  // 0.75 = 50% faster than original 0.5
 }
 
 /* ---------------- DOM behaviors ---------------- */
