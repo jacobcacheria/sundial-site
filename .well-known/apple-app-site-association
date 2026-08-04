@@ -1,0 +1,15 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["JD7V37426X.com.jacobcacheria.Sundial"],
+        "components": [
+          {
+            "/": "/e/*",
+            "comment": "Invite links open straight into Sundial."
+          }
+        ]
+      }
+    ]
+  }
+}
