@@ -20,7 +20,7 @@ vec3 strandColor(float t){ if(uColorCount>0) return samplePalette(t); return spe
 void main(){
   vec2 uv=(gl_FragCoord.xy-0.5*uResolution)/uResolution.y; uv/=max(uScale,0.0001);
   float e=0.06+uIntensity*0.94;
-  float env=pow(max(cos(uv.x*PI*1.3),0.0),uTaper);
+  float env=pow(max(cos(uv.x*PI*1.05),0.0),uTaper);
   vec3 col=vec3(0.0);
   for(int i=0;i<${MAX_STRANDS};i++){
     if(i>=uStrandCount) break;
@@ -94,7 +94,7 @@ function mountGL(ctn, frag, uniforms, onFrame){
 
 function initStrands(ctn){
   const o = { colors:['#F97316','#db6767','#ffffff'], count:3, speed:0.5, amplitude:1, waviness:1,
-    thickness:0.7, glow:2.6, taper:3, spread:1, hueShift:0, intensity:0.6, saturation:1.7, opacity:1, scale:1.5 };
+    thickness:0.7, glow:2.6, taper:2.4, spread:1, hueShift:0, intensity:0.6, saturation:1.7, opacity:1, scale:1.85 };
   mountGL(ctn, STRANDS_FRAG, {
     uTime:{value:0}, uResolution:{value:[1,1]},
     uColors:{value:pad(o.colors)}, uColorCount:{value:Math.min(o.colors.length,MAX_COLORS)}, uStrandCount:{value:Math.min(o.count,MAX_STRANDS)},
@@ -141,6 +141,14 @@ function init(){
   if(modal){
     const card = modal.querySelector('.modal__card');
     const overlay = modal.querySelector('.modal__overlay');
+    // the policy text comes straight from privacy.html (the page the App Store links to), so the popup can't drift from it
+    const body = modal.querySelector('.modal__body');
+    fetch('privacy.html').then(r=> r.ok ? r.text() : Promise.reject(r.status)).then(html=>{
+      const doc = new DOMParser().parseFromString(html, 'text/html');
+      doc.querySelectorAll('footer, script').forEach(n=> n.remove());
+      doc.querySelectorAll('a[href^="http"]').forEach(a=>{ a.target = '_blank'; a.rel = 'noopener'; });
+      body.innerHTML = doc.body.innerHTML;
+    }).catch(()=>{});   // on failure the fallback link to privacy.html stays
     const EASE = 'cubic-bezier(0.16,1,0.3,1)';   // ≈ GSAP power3.out
     const DUR = 760, DIST = 150;
     let busy = false;
@@ -164,13 +172,18 @@ function init(){
     document.addEventListener('keydown', e=>{ if(e.key==='Escape' && !modal.hidden) close(); });
   }
 
-  // slow, eased smooth-scroll for in-page anchor links
-  const easeOutCubic = t => 1 - Math.pow(1 - t, 3);
-  function slowScroll(targetY, dur){
-    const startY = window.scrollY, diff = targetY - startY; let start;
-    function step(ts){ if(start===undefined) start = ts; const t = Math.min((ts-start)/dur, 1);
-      window.scrollTo(0, startY + diff * easeOutCubic(t)); if(t < 1) requestAnimationFrame(step); }
-    requestAnimationFrame(step);
+  // one continuous soft glide — eases in AND out, duration scales with distance (never a jump, never abrupt)
+  const easeInOut = t => t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3) / 2;
+  let scrollRAF = 0;
+  function softScrollTo(targetY){
+    if(scrollRAF) cancelAnimationFrame(scrollRAF);
+    const startY = window.scrollY, diff = targetY - startY;
+    if(Math.abs(diff) < 2) return;
+    const dur = Math.max(650, Math.min(2200, Math.abs(diff) / 4));   // long trips stay smooth, short ones quick
+    let start;
+    function step(ts){ if(start===undefined) start = ts; const t = Math.min((ts - start)/dur, 1);
+      window.scrollTo(0, startY + diff * easeInOut(t)); if(t < 1) scrollRAF = requestAnimationFrame(step); else scrollRAF = 0; }
+    scrollRAF = requestAnimationFrame(step);
   }
   document.querySelectorAll('a[href^="#"]').forEach(a=>{
     a.addEventListener('click', e=>{
@@ -179,8 +192,18 @@ function init(){
       const el = document.querySelector(id);
       if(!el) return;
       e.preventDefault();
-      const y = Math.max(0, el.getBoundingClientRect().top + window.scrollY - 64);
-      slowScroll(y, 1500);                            // ~1.5s gentle glide
+      const reel = document.querySelector('#showcase .reel');
+      const rt = window.ScrollTrigger && window.ScrollTrigger.getAll().find(t=>t.pin && t.trigger===reel);
+      const headerTop = Math.min(108, Math.max(74, window.innerHeight * 0.10));   // matches the reel's header height
+      let target;
+      if(id === '#showcase' && rt){
+        const n = document.querySelectorAll('#showcase .reel__shot').length || 6;
+        target = Math.round(rt.start + (rt.end - rt.start) / n);    // exactly the first snap point: only the first image shows
+      } else {
+        const head = el.querySelector('.kicker') || el;            // land each section's heading at the same top height
+        target = Math.max(0, head.getBoundingClientRect().top + window.scrollY - headerTop);
+      }
+      softScrollTo(target);                                          // one smooth glide from wherever you are now
     });
   });
 
@@ -196,3 +219,230 @@ function init(){
 
 if(document.readyState!=='loading') init();
 else document.addEventListener('DOMContentLoaded', init);
+
+/* ---------------- ScrollFloat (per-character float-in on scroll) ---------------- */
+function initScrollFloat(){
+  const g = window.gsap, ST = window.ScrollTrigger;
+  if(!g || !ST) return;
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  g.registerPlugin(ST);
+  document.querySelectorAll('.section__title, .get__title').forEach(el=>{
+    if(el.dataset.sf) return; el.dataset.sf = '1';
+    const nodes = Array.from(el.childNodes);
+    el.textContent = '';
+    const chars = [];
+    nodes.forEach(node=>{
+      if(node.nodeType === 3){ // text -> words -> chars (keep spaces for wrapping)
+        node.textContent.split(/(\s+)/).forEach(part=>{
+          if(part === '') return;
+          if(/^\s+$/.test(part)){ el.appendChild(document.createTextNode(part)); return; }
+          const word = document.createElement('span'); word.className = 'sf-word';
+          Array.from(part).forEach(ch=>{
+            const c = document.createElement('span'); c.className = 'sf-char'; c.textContent = ch;
+            word.appendChild(c); chars.push(c);
+          });
+          el.appendChild(word);
+        });
+      } else if(node.nodeType === 1){ // keep element children (e.g. glowing emoticons) as one animated unit
+        node.classList.add('sf-char'); el.appendChild(node); chars.push(node);
+      } else { el.appendChild(node); }
+    });
+    if(!chars.length) return;
+    // the "what it is" title gets a longer, gentler reveal so it doesn't feel rushed on the way in
+    const slow = el.closest('#what');
+    g.fromTo(chars,
+      { opacity:0, yPercent:120, scaleY:2.3, scaleX:0.7, transformOrigin:'50% 0%' },
+      { opacity:1, yPercent:0, scaleY:1, scaleX:1, ease:'back.inOut(2)', stagger: slow ? 0.06 : 0.03,
+        scrollTrigger:{ trigger:el, start:'top bottom-=6%',
+          end: slow ? 'bottom top+=30%' : 'bottom center+=6%',
+          scrub: slow ? 2.6 : 1.4 } });
+  });
+}
+if(document.readyState!=='loading') initScrollFloat();
+else document.addEventListener('DOMContentLoaded', initScrollFloat);
+
+/* ---------------- ScrollMotion — fluid float-in for all content below the hero (not the orange kickers) ---------------- */
+function initScrollMotion(){
+  const g = window.gsap, ST = window.ScrollTrigger;
+  if(!g || !ST) return;
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  g.registerPlugin(ST);
+  // hand below-hero content to GSAP; drop the old one-shot reveal so it doesn't fight the scrub
+  document.querySelectorAll('#what .reveal, #showcase .reveal, #story .reveal, #get .reveal, .footer .reveal')
+    .forEach(el => el.classList.remove('reveal','in'));
+  const sel = [
+    '#what .lead', '#what .glow-card', '#what .feats-more',
+    '#story .lead',
+    '#get .get__icon', '#get .get__cta', '#get .fineprint', '#get .thanks',
+    '.footer__inner'
+  ].join(',');
+  document.querySelectorAll(sel).forEach(el=>{
+    el.style.transition = 'none';
+    g.fromTo(el, { opacity:0, y:50 }, { opacity:1, y:0, ease:'power2.out',
+      scrollTrigger:{ trigger:el, start:'top bottom-=4%', end:'top center+=14%', scrub:1.5 } });
+  });
+}
+if(document.readyState!=='loading') initScrollMotion();
+else document.addEventListener('DOMContentLoaded', initScrollMotion);
+
+/* ---------------- Reel — pinned diagonal screenshot reveal (one at a time on scroll) ---------------- */
+function initReel(){
+  const g = window.gsap, ST = window.ScrollTrigger;
+  if(!g || !ST) return;
+  const stage = document.querySelector('#showcase .reel__stage');
+  if(!stage) return;
+  const cards = g.utils.toArray('#showcase .reel__card');
+  if(!cards.length) return;
+  stage.style.setProperty('--n', cards.length);   // the staircase layout centres on however many screenshots there are
+  const hint = document.querySelector('#showcase .reel__hint');
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){ g.set(cards,{opacity:1}); if(hint) hint.style.display='none'; return; }
+  g.registerPlugin(ST);
+  g.set(cards, { opacity:0, y:52, scale:0.95 });
+  // tap the front screenshot to enlarge it for reading (not full screen); scrolling, a second tap, or Esc shrinks it back
+  let zoomed = null, zoomY = 0;
+  const nav = document.getElementById('nav');
+  function unzoom(){
+    if(!zoomed) return;
+    const shot = zoomed; zoomed = null;
+    shot.classList.remove('is-zoomed'); shot.classList.add('is-settling');   // stays on top while it shrinks back
+    stage.classList.remove('has-zoom');
+    const done = e=>{ if(e && (e.target !== shot || e.propertyName !== 'transform')) return;
+      shot.classList.remove('is-settling'); shot.removeEventListener('transitionend', done); };
+    shot.addEventListener('transitionend', done); setTimeout(done, 700);
+  }
+  function zoom(shot){
+    const r = shot.getBoundingClientRect(), s = stage.getBoundingClientRect();
+    const top = (nav ? nav.getBoundingClientRect().bottom : 0) + 20, bottom = window.innerHeight - 20;
+    const scale = Math.min((bottom - top) / r.height, 1.5);
+    if(scale < 1.05) return;                                          // no room to grow on this screen
+    shot.style.setProperty('--zx', (s.left + s.width / 2) - (r.left + r.width / 2) + 'px');
+    shot.style.setProperty('--zy', (top + bottom) / 2 - (r.top + r.height / 2) + 'px');
+    shot.style.setProperty('--zs', scale);
+    shot.classList.remove('is-settling'); shot.classList.add('is-zoomed'); stage.classList.add('has-zoom');
+    zoomed = shot; zoomY = window.scrollY;
+  }
+  cards.forEach(c=> c.addEventListener('click', ()=>{
+    if(zoomed === c.parentElement) unzoom();
+    else if(parseFloat(getComputedStyle(c).opacity) > 0.5){ unzoom(); zoom(c.parentElement); }   // any visible image, front or back
+  }));
+  window.addEventListener('scroll', ()=>{ if(zoomed && Math.abs(window.scrollY - zoomY) > 24) unzoom(); }, { passive:true });
+  window.addEventListener('resize', unzoom);
+  document.addEventListener('keydown', e=>{ if(e.key === 'Escape') unzoom(); });
+  document.addEventListener('click', e=>{ if(zoomed && !zoomed.contains(e.target)) unzoom(); });
+  let lastActive = -1;
+  const setFront = p => {
+    // front = the card currently revealing / most recently fully shown (aligns with snap points)
+    const active = Math.max(0, Math.min(cards.length-1, Math.round(p * cards.length) - 1));
+    cards.forEach((c,i)=>{
+      c.classList.toggle('is-front', i===active);   // newest revealed: bright + glow
+      c.classList.toggle('is-behind', i<active);    // already covered: dim back
+      c.classList.toggle('is-ahead', i>active);     // not revealed yet: taps pass through to the images below
+    });
+    if(active !== lastActive){ lastActive = active; unzoom(); }   // the reel moved to another image: shrink back
+    if(hint) hint.style.opacity = String(Math.max(0, Math.min(1, (1 - p) * 4)));   // stays until the last images, then fades
+  };
+  const tl = g.timeline({ scrollTrigger:{
+    trigger:'#showcase .reel', start:'top top', end:'+=' + (cards.length*150) + '%',
+    pin:stage, pinSpacing:true, anticipatePin:1, scrub:1,
+    // inertia:false: snap from where the scroll actually stopped. With inertia on, the lagging scrub reads as leftover
+    // velocity after a nav glide and pushes the landing one image too far (two images from above, none from below).
+    snap:{ snapTo:1/cards.length, duration:{min:0.35,max:0.7}, delay:0.02, ease:'power2.inOut', inertia:false },
+    onUpdate:self=>setFront(self.progress) } });
+  cards.forEach((c,i)=> tl.to(c, { opacity:1, y:0, scale:1, ease:'power2.out', duration:1 }, i));
+  setFront(0);
+  window.__sundialReelTL = tl;   // exposed for debugging the reel from the console
+}
+if(document.readyState!=='loading') initReel();
+else document.addEventListener('DOMContentLoaded', initReel);
+
+/* ---------------- Feature peeks: hover a feature card to fade in a real screenshot of that feature ---------------- */
+function initFeaturePeeks(){
+  const cards = [...document.querySelectorAll('#what .glow-card[data-peek]')];
+  if(!cards.length) return;
+  const peek = document.createElement('div');
+  peek.className = 'feat-peek'; peek.setAttribute('aria-hidden', 'true');
+  document.body.appendChild(peek);
+  const list = card => card.dataset.peek.trim().split(/\s+/);
+  let current = null, cycle = 0;
+
+  function build(card){
+    peek.textContent = '';
+    peek.classList.toggle('is-tall', card.hasAttribute('data-peek-tall'));
+    peek.classList.toggle('is-wide', card.hasAttribute('data-peek-wide'));
+    list(card).forEach(src=>{
+      const isVideo = src.endsWith('.mp4');
+      const el = document.createElement(isVideo ? 'video' : 'img');
+      el.className = 'feat-peek__item';
+      if(isVideo){ el.muted = true; el.loop = true; el.playsInline = true; el.preload = 'auto'; if(card.dataset.poster) el.poster = card.dataset.poster; }
+      else el.alt = '';
+      el.src = src;
+      peek.appendChild(el);
+    });
+  }
+  function showItem(i){
+    [...peek.children].forEach((el, k)=>{
+      el.classList.toggle('is-shown', k === i);
+      if(el.tagName === 'VIDEO'){ if(k === i){ el.currentTime = 0; el.play().catch(()=>{}); } else el.pause(); }
+    });
+  }
+  function place(card){
+    peek.style.height = '';
+    const r = card.getBoundingClientRect(), w = peek.offsetWidth, gap = 14, vw = window.innerWidth, vh = window.innerHeight;
+    let h = peek.offsetHeight;
+    const nav = document.getElementById('nav');
+    const safeTop = (nav ? nav.getBoundingClientRect().bottom : 0) + 8;
+    const above = r.top - gap - safeTop, below = vh - 8 - r.bottom - gap;
+    const right = vw - 8 - r.right - gap, left = r.left - 8 - gap;
+    // above the card if it fits, else below, else beside it (tall shots on short screens), else shrink to the roomier side
+    const mode = above >= h ? 'above' : below >= h ? 'below' : Math.max(right, left) >= w ? 'side' : (above >= below ? 'above' : 'below');
+    if(mode !== 'side' && Math.max(above, below) < h){ h = Math.max(200, Math.max(above, below)); peek.style.height = h + 'px'; }
+    let x, y;
+    if(mode === 'side'){ x = right >= w ? r.right + gap : r.left - w - gap; y = r.top + r.height / 2 - h / 2; }
+    else { x = r.left + r.width / 2 - w / 2; y = mode === 'above' ? r.top - h - gap : r.bottom + gap; }
+    x = Math.max(8, Math.min(x, vw - w - 8));
+    y = Math.max(safeTop, Math.min(y, vh - h - 8));                                               // always fully on screen
+    peek.style.left = x + window.scrollX + 'px';
+    peek.style.top = y + window.scrollY + 'px';
+    peek.classList.toggle('is-below', mode === 'below');
+    peek.classList.toggle('is-side', mode === 'side');
+  }
+  function open(card){
+    clearInterval(cycle);
+    if(current !== card){ current = card; build(card); }
+    place(card); showItem(0);
+    peek.classList.add('is-on');
+    const n = peek.children.length;
+    if(n > 1){ let i = 0; cycle = setInterval(()=>{ i = (i + 1) % n; showItem(i); }, 2600); }   // several shots: slowly cross-fade through them
+  }
+  function close(){
+    clearInterval(cycle);
+    peek.classList.remove('is-on');
+    peek.querySelectorAll('video').forEach(v=> v.pause());
+  }
+
+  const hover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  cards.forEach(card=>{
+    if(hover){
+      card.addEventListener('mouseenter', ()=> open(card));
+      card.addEventListener('mouseleave', close);
+    } else {
+      card.addEventListener('click', ()=> (current === card && peek.classList.contains('is-on')) ? close() : open(card));   // touch: tap a card to peek
+    }
+  });
+  if(!hover) window.addEventListener('scroll', ()=>{ if(peek.classList.contains('is-on')) close(); }, { passive:true });
+  window.addEventListener('resize', close);
+
+  // warm the image cache as the section approaches, so the first hover fades in right away
+  const io = new IntersectionObserver(entries=>{
+    if(!entries.some(e=> e.isIntersecting)) return;
+    io.disconnect();
+    cards.forEach(card=>{
+      list(card).filter(src=> !src.endsWith('.mp4')).forEach(src=>{ new Image().src = src; });
+      if(card.dataset.poster) new Image().src = card.dataset.poster;
+    });
+  }, { rootMargin:'600px 0px' });
+  io.observe(document.getElementById('what'));
+}
+if(document.readyState!=='loading') initFeaturePeeks();
+else document.addEventListener('DOMContentLoaded', initFeaturePeeks);
+
