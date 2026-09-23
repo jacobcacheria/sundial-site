@@ -133,7 +133,10 @@ function init(){
 
   // nav scrolled state
   const nav = document.getElementById('nav');
-  const onScroll = ()=>{ nav.classList.toggle('scrolled', window.scrollY>40); };
+  // Guarded: a page built from this file without a header (the invite page)
+  // threw here on the FIRST call, and everything below it in init() — the
+  // reveal observer, the card glows, the soft anchors, the modal — never ran.
+  const onScroll = ()=>{ if(nav) nav.classList.toggle('scrolled', window.scrollY>40); };
   window.addEventListener('scroll', onScroll, { passive:true }); onScroll();
 
   // privacy modal — horizontal slide in (power3.out), reverse on close

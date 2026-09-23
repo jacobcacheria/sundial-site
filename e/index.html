@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>an invite to sundial</title>
+<meta name="description" content="Someone wants to start an orbit with you on Sundial: a shared note that lives on both your home screens." />
+
+<!-- Safari's own banner. Tapping it opens Sundial if it's installed, or the
+     App Store if it isn't, and hands the invite straight to the app. -->
+<meta name="apple-itunes-app" content="app-id=6781439817" id="smart-banner" />
+
+<!-- What Messages, WhatsApp and the rest draw when this link is sent. -->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Sundial" />
+<meta property="og:title" content="an invite to sundial" />
+<meta property="og:description" content="someone wants to start an orbit with you. a shared note that lives on both your home screens." />
+<meta property="og:image" content="https://sundialus.com/assets/icon.png" />
+<meta property="og:url" content="https://sundialus.com/e/" />
+<meta name="twitter:card" content="summary_large_image" />
+
+<link rel="icon" href="/assets/icon.png" />
+<link rel="preconnect" href="https://api.fontshare.com" crossorigin />
+<link href="https://api.fontshare.com/v2/css?f[]=ranade@300,400,500,700&f[]=satoshi@400,500,700,900&display=swap" rel="stylesheet" />
+<!-- The site's own stylesheet, not a copy of it: an invite IS a sundial page,
+     and anyone who has seen the homepage already has this cached. -->
+<link rel="stylesheet" href="/css/styles.css" />
+<style>
+  /* The only page-specific rules there are. Everything visual above this line
+     comes from the theme; this centres one short section in the window, since
+     an invite has no page to scroll. */
+  body{ background:var(--night); }
+  /* The hero's own ground, so the ribbons sit on what they were drawn for. */
+  .invite{
+    min-height:100svh; display:grid; align-items:center; padding:38px 0;
+    background:radial-gradient(120% 90% at 50% 0%, #2a1f2e 0%, var(--dusk) 45%, var(--night) 100%);
+  }
+  /* Softer than the homepage's .95: this page has words over the whole of it,
+     not one short headline, and the star field has to stay visible through. */
+  .invite .hero__fx{ opacity:.55; }
+  .invite .container{ z-index:3; }
+  .invite .get__icon{ width:68px; height:68px; margin-bottom:18px; }
+  .invite .get__inner{ max-width:620px; }
+  .invite .kicker{ font-size:19px; margin-bottom:10px; }
+  .invite .get__cta{ flex-direction:column; align-items:stretch; margin-top:26px; }
+  /* The warm panel over the night sky: the theme lightens TEXT on a dark
+     section rather than repainting panels, so the glass tint stays and the
+     words inside it turn light. Cocoa on a dark panel is unreadable. */
+  .invite .priv{ margin-top:26px; padding:22px 24px; text-align:left; }
+  .invite .priv__body .kicker{ font-size:17px; color:var(--honey); }
+  .invite .priv__body strong{ color:#fff; }
+  .invite .priv__body ol{ list-style:none; counter-reset:step; }
+  .invite .priv__body li{
+    counter-increment:step; position:relative; padding-left:30px;
+    color:rgba(255,255,255,.84); font-size:15.5px; line-height:1.6; margin-bottom:8px;
+  }
+  .invite .priv__body li:last-child{ margin-bottom:0; }
+  .invite .priv__body li::before{
+    content:counter(step); position:absolute; left:0; top:2px;
+    width:20px; height:20px; border-radius:50%; display:grid; place-items:center;
+    font-family:var(--body); font-size:11px; font-weight:700; color:#3a2410;
+    background:linear-gradient(135deg,var(--honey),var(--amber));
+  }
+  .invite .fineprint a{ color:rgba(255,255,255,.72); border-bottom:1px solid rgba(255,255,255,.28); }
+  /* No token in the link: nothing on this page can work, so say so plainly. */
+  .bad{ display:none; color:var(--honey); font-size:16px; margin-top:26px; }
+  body.no-token .needs-token{ display:none; }
+  body.no-token .bad{ display:block; }
+  .said{ opacity:.7; }
+  @media (max-width:560px){
+    .invite .priv{ flex-direction:column; gap:16px; padding:24px 22px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- From the theme kit's icon set, only the ones this page uses. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="g-warm" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F2B95C"/><stop offset="1" stop-color="#E07C3C"/>
+    </linearGradient>
+  </defs>
+  <symbol id="ic-link" viewBox="0 0 24 24">
+    <g stroke="#E07C3C" stroke-width="2.3" fill="none" stroke-linecap="round">
+      <path d="M9.6 14.4l4.8-4.8"/>
+      <path d="M8.4 11.6 6.6 13.4a3.4 3.4 0 0 0 4.8 4.8l1.8-1.8"/>
+      <path d="M15.6 12.4l1.8-1.8a3.4 3.4 0 0 0-4.8-4.8l-1.8 1.8"/>
+    </g>
+  </symbol>
+</svg>
+
+<section class="section get get--dark invite">
+  <canvas class="night-sky" id="nightsky"></canvas>
+  <div class="hero__fx" id="strands"></div>
+  <div class="hero__veil"></div>
+  <div class="container get__inner">
+    <img src="/assets/icon.png" alt="" class="get__icon" />
+    <p class="kicker">an invite to sundial</p>
+    <h1 class="get__title">someone wants to orbit with you</h1>
+    <p class="lead">a shared note that lives on both your home screens. one orbit, two people, all day.</p>
+
+    <p class="bad">this invite link is missing its code. ask them to send it again</p>
+
+    <div class="needs-token">
+      <div class="get__cta">
+        <a class="btn btn--glow btn--lg btn--sun" id="get" href="https://apps.apple.com/app/id6781439817"><span>get sundial</span></a>
+        <button class="btn btn--ghost" id="open" type="button">open in sundial</button>
+        <button class="btn btn--ghost" id="copy" type="button">copy the invite link</button>
+      </div>
+
+      <div class="priv">
+        <div class="priv__icon"><svg class="ic"><use href="#ic-link"/></svg></div>
+        <div class="priv__body">
+          <p class="kicker">after it installs</p>
+          <ol>
+            <li>open sundial and make your name</li>
+            <li>tap <strong>start an orbit</strong>, then <strong>join one</strong></li>
+            <li>tap <strong>paste</strong> and you're in. no code to type.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+
+    <p class="fineprint">
+      invites expire, and each one works once &middot; no email &middot; no phone number<br />
+      <a href="https://sundialus.com">what is sundial?</a>
+    </p>
+  </div>
+</section>
+
+<!-- The site's own night sky: stars, a constellation, the odd meteor. -->
+<script src="/js/starrynight.js"></script>
+<script type="module" src="/js/effects.js"></script>
+<script>
+  // The token can arrive three ways, because links live a long time once
+  // they're out in the world: ?t=... (what the app shares today), #... (never
+  // sent to a server), and /e/<token> (the original pretty path, handed here
+  // by 404.html). First one found wins.
+  var token = (function () {
+    var q = new URLSearchParams(location.search).get('t');
+    if (q) return q.trim();
+    if (location.hash.length > 1) return decodeURIComponent(location.hash.slice(1)).trim();
+    var m = location.pathname.match(/\/e\/([^/?#]+)/);
+    return m ? decodeURIComponent(m[1]).trim() : '';
+  })();
+
+  // Only ever a token: anything with a slash or a space is somebody's typo,
+  // not an invite, and shouldn't be put in front of the app.
+  if (!/^[A-Za-z0-9_-]{6,120}$/.test(token)) {
+    document.body.classList.add('no-token');
+  } else {
+    var link = 'https://sundialus.com/e/?t=' + encodeURIComponent(token);
+
+    // Safari's banner can carry the invite through the App Store for us.
+    document.getElementById('smart-banner')
+      .setAttribute('content', 'app-id=6781439817, app-argument=' + link);
+
+    // The App Store link, with the invite riding along for a phone that
+    // already has the app installed from a previous invite.
+    document.getElementById('get').href =
+      'https://apps.apple.com/app/id6781439817?app-argument=' + encodeURIComponent(link);
+
+    // Already installed: the custom scheme is the reliable way back into the
+    // app from inside Safari, where tapping a universal link just reloads.
+    document.getElementById('open').addEventListener('click', function () {
+      location.href = 'sundial://join/' + encodeURIComponent(token);
+    });
+
+    // The one that closes the install gap: the link goes on their clipboard,
+    // and sundial's join screen has a paste button waiting for it.
+    var copy = document.getElementById('copy');
+    copy.addEventListener('click', async function () {
+      try {
+        await navigator.clipboard.writeText(link);
+      } catch (e) {
+        // Older Safari, or clipboard permission refused: fall back to the
+        // selection trick, which has worked everywhere for a decade.
+        var f = document.createElement('textarea');
+        f.value = link;
+        f.setAttribute('readonly', '');
+        f.style.position = 'fixed';
+        f.style.opacity = '0';
+        document.body.appendChild(f);
+        f.select();
+        try { document.execCommand('copy'); } catch (_) {}
+        document.body.removeChild(f);
+      }
+      copy.textContent = 'copied, paste it in sundial';
+      copy.classList.add('said');
+    });
+  }
+</script>
+</body>
+</html>

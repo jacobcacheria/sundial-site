@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>nothing here — sundial</title>
+<link rel="icon" href="/assets/icon.png" />
+<script>
+  // GitHub Pages has no routing, so a pretty invite link — /e/<token> — lands
+  // here instead of on the invite page. Hand it over before anything paints,
+  // and replace the entry so Back doesn't bounce off this page.
+  (function () {
+    var m = location.pathname.match(/^\/e\/([^/?#]+)\/?$/);
+    if (m) location.replace('/e/?t=' + encodeURIComponent(m[1]));
+  })();
+</script>
+<link rel="preconnect" href="https://api.fontshare.com" crossorigin />
+<link href="https://api.fontshare.com/v2/css?f[]=ranade@300,400,500,700&f[]=satoshi@400,500,700,900&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/css/styles.css" />
+<style>
+  body{ background:var(--night); }
+  .lost{ min-height:100svh; display:grid; align-items:center; }
+  .lost .get__inner{ max-width:560px; }
+  .lost .lead{ margin-top:16px; }
+</style>
+</head>
+<body>
+<section class="section get get--dark lost">
+  <canvas class="night-sky" id="nightsky"></canvas>
+  <div class="container get__inner">
+    <img src="/assets/icon.png" alt="" class="get__icon" />
+    <h1 class="get__title">the sun set on this one</h1>
+    <p class="lead">there's nothing at this address. an invite may have already been used, or expired.</p>
+    <div class="get__cta">
+      <a class="btn btn--glow btn--lg btn--sun" href="/"><span>back to sundial</span></a>
+    </div>
+  </div>
+</section>
+<script src="/js/starrynight.js"></script>
+</body>
+</html>

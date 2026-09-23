@@ -5,8 +5,12 @@
         "appIDs": ["JD7V37426X.com.jacobcacheria.Sundial"],
         "components": [
           {
+            "/": "/e/",
+            "comment": "Invite links carrying the token as ?t= open straight into Sundial."
+          },
+          {
             "/": "/e/*",
-            "comment": "Invite links open straight into Sundial."
+            "comment": "The older pretty form, /e/<token>, still opens the app."
           }
         ]
       }
