@@ -6,6 +6,9 @@
   if(!canvas || !canvas.getContext) return;
   const ctx = canvas.getContext('2d');
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // <canvas data-constellation="off"> — stars and meteors, no crown and no
+  // name under it. The invite page wants a quiet sky behind one short card.
+  const showCst = canvas.dataset.constellation !== 'off';
   const DPR = Math.min(2, window.devicePixelRatio || 1);
   let W = 0, H = 0;
 
@@ -170,12 +173,12 @@
     if(rect.bottom < -120 || rect.top > innerHeight + 120) return;   // skip drawing when far off-screen
     const t = now/1000 - startT;
     ctx.clearRect(0, 0, W, H);
-    drawStars(t); drawConstellation(t);
+    drawStars(t); if(showCst) drawConstellation(t);
     meteors(t); shower(t); shootingStar(t); ships(t);
   }
 
   resize();
   window.addEventListener('resize', resize);
-  if(reduce){ ctx.clearRect(0,0,W,H); drawStars(2); drawConstellation(2); }
+  if(reduce){ ctx.clearRect(0,0,W,H); drawStars(2); if(showCst) drawConstellation(2); }
   else { startT = performance.now()/1000; requestAnimationFrame(frame); }
 })();

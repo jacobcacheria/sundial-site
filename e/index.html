@@ -68,7 +68,20 @@
   .invite .priv__body .after{
     margin-top:10px; font-size:14px; color:rgba(255,255,255,.62);
   }
-  .invite .fineprint a{ color:rgba(255,255,255,.72); border-bottom:1px solid rgba(255,255,255,.28); }
+  /* The way out to the rest of sundial, for somebody who has never heard of
+     it. It was the smallest, dimmest thing on a page that exists to explain
+     the app. */
+  .invite .fineprint .whatis{
+    display:inline-block; margin-top:8px; font-family:var(--display);
+    font-weight:700; font-size:17px; color:var(--honey); border:0;
+    /* drop-shadow, not text-shadow: it follows the glyphs themselves, so the
+       light hugs the letters instead of filling the line box behind them. */
+    filter:drop-shadow(0 0 9px rgba(242,185,92,.55));
+  }
+  .invite .after .grin{
+    color:var(--honey);
+    filter:drop-shadow(0 0 7px rgba(242,185,92,.7));
+  }
   /* No token in the link: nothing on this page can work, so say so plainly. */
   .bad{ display:none; color:var(--honey); font-size:16px; margin-top:26px; }
   body.no-token .needs-token{ display:none; }
@@ -81,31 +94,15 @@
 </head>
 <body>
 
-<!-- From the theme kit's icon set, only the ones this page uses. -->
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <defs>
-    <linearGradient id="g-warm" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#F2B95C"/><stop offset="1" stop-color="#E07C3C"/>
-    </linearGradient>
-  </defs>
-  <symbol id="ic-link" viewBox="0 0 24 24">
-    <g stroke="#E07C3C" stroke-width="2.3" fill="none" stroke-linecap="round">
-      <path d="M9.6 14.4l4.8-4.8"/>
-      <path d="M8.4 11.6 6.6 13.4a3.4 3.4 0 0 0 4.8 4.8l1.8-1.8"/>
-      <path d="M15.6 12.4l1.8-1.8a3.4 3.4 0 0 0-4.8-4.8l-1.8 1.8"/>
-    </g>
-  </symbol>
-</svg>
-
 <section class="section get get--dark invite">
-  <canvas class="night-sky" id="nightsky"></canvas>
+  <canvas class="night-sky" id="nightsky" data-constellation="off"></canvas>
   <div class="hero__fx" id="strands"></div>
   <div class="hero__veil"></div>
   <div class="container get__inner">
     <img src="/assets/icon.png" alt="" class="get__icon" />
     <p class="kicker">an invite to sundial</p>
-    <h1 class="get__title">someone wants to orbit with you</h1>
-    <p class="lead">a shared note that lives on both your home screens. one orbit, two people, all day.</p>
+    <h1 class="get__title">someone wants to orbit you</h1>
+    <p class="lead">a shared note that lives on both your home screens.</p>
 
     <p class="bad">this invite link is missing its code. ask them to send it again</p>
 
@@ -117,21 +114,20 @@
       <p class="already">already have sundial? just tap <strong>open in sundial</strong>.</p>
 
       <div class="priv">
-        <div class="priv__icon"><svg class="ic"><use href="#ic-link"/></svg></div>
         <div class="priv__body">
           <p class="kicker">new to sundial?</p>
           <ol>
             <li>tap <strong>download sundial</strong> and install it</li>
             <li>come back here and tap <strong>open in sundial</strong></li>
           </ol>
-          <p class="after">that's it. you're in orbit, with no code to type.</p>
+          <p class="after">that's it, you're in orbit <span class="grin">:)</span></p>
         </div>
       </div>
     </div>
 
     <p class="fineprint">
-      invites expire, and each one works once &middot; no email &middot; no phone number<br />
-      <a href="https://sundialus.com">what is sundial?</a>
+      invites expire after 24 hours &middot; no email &middot; no phone number<br />
+      <a class="whatis" href="https://sundialus.com">what is sundial?</a>
     </p>
   </div>
 </section>
