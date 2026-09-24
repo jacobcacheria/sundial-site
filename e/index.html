@@ -61,6 +61,13 @@
     font-family:var(--body); font-size:11px; font-weight:700; color:#3a2410;
     background:linear-gradient(135deg,var(--honey),var(--amber));
   }
+  .invite .already{
+    margin-top:14px; font-size:14px; color:rgba(255,255,255,.72);
+  }
+  .invite .already strong{ color:var(--honey); font-weight:700; }
+  .invite .priv__body .after{
+    margin-top:10px; font-size:14px; color:rgba(255,255,255,.62);
+  }
   .invite .fineprint a{ color:rgba(255,255,255,.72); border-bottom:1px solid rgba(255,255,255,.28); }
   /* No token in the link: nothing on this page can work, so say so plainly. */
   .bad{ display:none; color:var(--honey); font-size:16px; margin-top:26px; }
@@ -104,20 +111,20 @@
 
     <div class="needs-token">
       <div class="get__cta">
-        <a class="btn btn--glow btn--lg btn--sun" id="get" href="https://apps.apple.com/app/id6781439817"><span>get sundial</span></a>
+        <a class="btn btn--glow btn--lg btn--sun" id="get" href="https://apps.apple.com/app/id6781439817"><span>download sundial</span></a>
         <button class="btn btn--ghost" id="open" type="button">open in sundial</button>
-        <button class="btn btn--ghost" id="copy" type="button">copy the invite link</button>
       </div>
+      <p class="already">already have sundial? just tap <strong>open in sundial</strong>.</p>
 
       <div class="priv">
         <div class="priv__icon"><svg class="ic"><use href="#ic-link"/></svg></div>
         <div class="priv__body">
-          <p class="kicker">after it installs</p>
+          <p class="kicker">new to sundial?</p>
           <ol>
-            <li>open sundial and make your name</li>
-            <li>tap <strong>start an orbit</strong>, then <strong>join one</strong></li>
-            <li>tap <strong>paste</strong> and you're in. no code to type.</li>
+            <li>tap <strong>download sundial</strong> and install it</li>
+            <li>come back here and tap <strong>open in sundial</strong></li>
           </ol>
+          <p class="after">that's it. you're in orbit, with no code to type.</p>
         </div>
       </div>
     </div>
@@ -167,28 +174,6 @@
       location.href = 'sundial://join/' + encodeURIComponent(token);
     });
 
-    // The one that closes the install gap: the link goes on their clipboard,
-    // and sundial's join screen has a paste button waiting for it.
-    var copy = document.getElementById('copy');
-    copy.addEventListener('click', async function () {
-      try {
-        await navigator.clipboard.writeText(link);
-      } catch (e) {
-        // Older Safari, or clipboard permission refused: fall back to the
-        // selection trick, which has worked everywhere for a decade.
-        var f = document.createElement('textarea');
-        f.value = link;
-        f.setAttribute('readonly', '');
-        f.style.position = 'fixed';
-        f.style.opacity = '0';
-        document.body.appendChild(f);
-        f.select();
-        try { document.execCommand('copy'); } catch (_) {}
-        document.body.removeChild(f);
-      }
-      copy.textContent = 'copied, paste it in sundial';
-      copy.classList.add('said');
-    });
   }
 </script>
 </body>
