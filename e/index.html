@@ -116,11 +116,19 @@
       <div class="priv">
         <div class="priv__body">
           <p class="kicker">new to sundial?</p>
+          <!--
+            Step two used to say "come back here and tap open in sundial",
+            which is an instruction she cannot follow: installing takes her to
+            the App Store and out of this page, and she has no reason to think
+            of coming back to a tab she has already left. Going back to the
+            message she was sent is something anybody can do from anywhere, and
+            it works, because the link opens the app directly once it exists.
+          -->
           <ol>
             <li>tap <strong>download sundial</strong> and install it</li>
-            <li>come back here and tap <strong>open in sundial</strong></li>
+            <li>open their message again and tap the link</li>
           </ol>
-          <p class="after">that's it, you're in orbit <span class="grin">:)</span></p>
+          <p class="after">still on this page? tap <strong>open in sundial</strong> instead. either way, you're in orbit <span class="grin">:)</span></p>
         </div>
       </div>
     </div>
@@ -159,10 +167,11 @@
     document.getElementById('smart-banner')
       .setAttribute('content', 'app-id=6781439817, app-argument=' + link);
 
-    // The App Store link, with the invite riding along for a phone that
-    // already has the app installed from a previous invite.
-    document.getElementById('get').href =
-      'https://apps.apple.com/app/id6781439817?app-argument=' + encodeURIComponent(link);
+    // Plain. `?app-argument=` was on this link for a while with a comment
+    // saying the invite rode along through the App Store, which is not a thing
+    // the App Store does: it is a Safari smart banner parameter, and it is
+    // already doing its job on the meta tag above. Believing it worked here is
+    // what made the install-then-return path look covered when it was not.
 
     // Already installed: the custom scheme is the reliable way back into the
     // app from inside Safari, where tapping a universal link just reloads.
