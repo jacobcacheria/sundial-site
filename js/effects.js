@@ -334,8 +334,9 @@ function initReel(){
   document.addEventListener('click', e=>{ if(zoomed && !zoomed.contains(e.target)) unzoom(); });
   let lastActive = -1;
   const setFront = p => {
-    // front = the card currently revealing / most recently fully shown (aligns with snap points)
-    const active = Math.max(0, Math.min(cards.length-1, Math.round(p * cards.length) - 1));
+    // front = the card currently revealing / most recently fully shown (aligns with snap points).
+    // Stays -1 until the first image is halfway in, so nothing is flagged front before it appears.
+    const active = Math.min(cards.length-1, Math.round(p * cards.length) - 1);
     cards.forEach((c,i)=>{
       c.classList.toggle('is-front', i===active);   // newest revealed: bright + glow
       c.classList.toggle('is-behind', i<active);    // already covered: dim back

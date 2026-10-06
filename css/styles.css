@@ -282,6 +282,42 @@ em{font-style:normal; color:var(--amber-deep)}
 .reel__shot.is-zoomed{ transform:translate(-50%,-50%) translate(calc((var(--i) - (var(--n) - 1) / 2) * var(--stepX) + var(--zx, 0px)), calc((var(--i) - (var(--n) - 1) / 2) * var(--stepY) + var(--zy, 0px))) scale(var(--zs, 1)); }
 .reel__shot.is-zoomed .reel__card{ cursor:zoom-out; will-change:auto; filter:none; }   /* a dimmed back image lights up while enlarged */
 .reel__stage.has-zoom .reel__head, .reel__stage.has-zoom .reel__hint{ opacity:0 !important; }
+/* a golden chat bubble tied to each screenshot, fading in while that image is the one in front */
+.reel__say{ position:absolute; z-index:6; top:15%; left:calc(100% + 26px); width:clamp(186px,20vw,290px);
+  padding:15px 18px; border-radius:20px 20px 20px 6px; text-align:left;
+  background:linear-gradient(135deg, rgba(255,233,189,.97), rgba(247,203,133,.95));
+  border:1px solid rgba(224,138,76,.45); color:var(--cocoa);
+  font-size:clamp(13px,1.05vw,15px); line-height:1.5;
+  box-shadow:0 12px 30px rgba(224,124,60,.26), 0 0 24px rgba(242,185,92,.4);
+  opacity:0; transform:translateY(10px) scale(.96); pointer-events:none;
+  transition:opacity .55s var(--ease), transform .65s var(--ease); }
+.reel__say--left{ left:auto; right:calc(100% + 26px); border-radius:20px 20px 6px 20px; }
+/* the tail: two dots trailing back to the image it belongs to */
+.reel__say::before, .reel__say::after{ content:""; position:absolute; border-radius:50%;
+  background:rgba(250,214,150,.95); box-shadow:0 0 14px rgba(242,185,92,.6); }
+.reel__say::before{ width:11px; height:11px; bottom:-3px; left:-10px; }
+.reel__say::after{ width:6px; height:6px; bottom:-13px; left:-19px; }
+.reel__say--left::before{ left:auto; right:-10px; }
+.reel__say--left::after{ left:auto; right:-19px; }
+.reel__shot:has(.reel__card.is-front) .reel__say{ opacity:1; transform:none; animation:sayGlow 3.2s ease-in-out infinite; }
+.reel__shot.is-zoomed .reel__say{ opacity:0; animation:none; }   /* out of the way while an image is enlarged */
+@keyframes sayGlow{
+  0%,100%{ box-shadow:0 12px 30px rgba(224,124,60,.26), 0 0 22px rgba(242,185,92,.38); }
+  50%{ box-shadow:0 12px 32px rgba(224,124,60,.3), 0 0 34px rgba(250,196,110,.62); } }
+@media (max-width:760px){   /* no room beside the stack on a phone: the bubble sits under the image */
+  /* each image sits off-centre in the staircase, so undo that offset and the bubble stays centred on screen */
+  .reel__say, .reel__say--left{ --sayShift:calc(((var(--n) - 1) / 2 - var(--i)) * var(--stepX));
+    top:calc(100% + 18px); left:50%; right:auto; width:min(86vw,360px);
+    border-radius:18px; text-align:center;
+    transform:translate(-50%,10px) translateX(var(--sayShift)) scale(.96); }
+  .reel__shot:has(.reel__card.is-front) .reel__say{ transform:translate(-50%,0) translateX(var(--sayShift)); }
+  /* the tail still points back at its own image, which is off to one side */
+  .reel__say::before, .reel__say--left::before{ left:calc(50% - var(--sayShift) - 6px); right:auto; top:-5px; bottom:auto; }
+  .reel__say::after, .reel__say--left::after{ left:calc(50% - var(--sayShift) - 20px); right:auto; top:-14px; bottom:auto; } }
+@media (prefers-reduced-motion:reduce){   /* the reel is a plain stacked list here, so just show every caption */
+  .reel__say, .reel__say--left{ position:static; opacity:1; transform:none; animation:none;
+    width:min(86vw,420px); margin:14px auto 0; text-align:center; }
+  .reel__say::before, .reel__say::after{ display:none; } }
 @keyframes reelGlow{
   0%,100%{ box-shadow:0 0 0 2.5px rgba(255,205,125,.85), 0 0 22px 3px rgba(245,170,90,.5), 0 14px 34px rgba(20,12,30,.5); }
   50%{ box-shadow:0 0 0 3.5px rgba(255,224,150,1), 0 0 34px 7px rgba(250,188,104,.9), 0 14px 34px rgba(20,12,30,.5); } }
