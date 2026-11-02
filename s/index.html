@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#241C3A">
+<title>sundial</title>
+<style>
+  :root {
+    --sky: #241c3a;
+    --sky-low: #14101c;
+    --ink: #f6efe2;
+    --soft: #d5c4ae;
+    --honey: #f2b95c;
+    --amber: #e08a4c;
+    --card: rgba(255, 255, 255, 0.08);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  body {
+    background: linear-gradient(var(--sky-low), var(--sky));
+    background-attachment: fixed;
+    color: var(--ink);
+    font: 17px/1.45 ui-rounded, -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+    text-transform: lowercase;
+    display: flex;
+    justify-content: center;
+    padding: max(48px, env(safe-area-inset-top)) 16px max(32px, env(safe-area-inset-bottom));
+  }
+  main { width: 100%; max-width: 400px; text-align: center; }
+  .sun {
+    width: 72px; height: 72px; margin: 0 auto 24px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #ffe7b0, var(--honey) 60%, var(--amber));
+    box-shadow: 0 0 44px rgba(242, 185, 92, 0.65);
+  }
+  h1 { font-size: 26px; line-height: 1.2; margin: 0 0 10px; }
+  p { margin: 0 0 22px; color: var(--soft); font-size: 15px; }
+  .button {
+    display: block; width: 100%; padding: 15px 18px; margin: 0 0 10px;
+    border: 0; border-radius: 16px; font: inherit; font-weight: 700;
+    text-decoration: none; text-transform: lowercase; cursor: pointer;
+    color: #fff; background: linear-gradient(90deg, var(--honey), var(--amber));
+  }
+  .quiet {
+    color: var(--honey); background: none;
+    box-shadow: inset 0 0 0 1px rgba(242, 185, 92, 0.5);
+  }
+  .carry {
+    margin-top: 28px; padding: 18px 16px; border-radius: 24px;
+    background: var(--card); box-shadow: inset 0 0 0 1px rgba(224, 138, 76, 0.32);
+  }
+  .carry p { margin-bottom: 12px; font-size: 14px; }
+  code {
+    display: block; margin: 0 0 12px; padding: 10px 12px; border-radius: 12px;
+    background: rgba(0, 0, 0, 0.28); color: var(--ink);
+    font: 12.5px/1.4 ui-monospace, Menlo, monospace; text-transform: none;
+    word-break: break-all; user-select: all; -webkit-user-select: all;
+  }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main>
+  <div class="sun" aria-hidden="true"></div>
+  <h1 id="title">someone wants to share their golden hours with you</h1>
+  <p id="about">sundial is a little private app for the people you keep closest. once a day, sundial asks for a photo of right now, and you see theirs once you've beamed yours.</p>
+  <a class="button" id="open" hidden>open in sundial</a>
+  <a class="button quiet" id="store" href="https://apps.apple.com/us/app/sundial/id6781439817">get sundial on the app store</a>
+  <section class="carry" id="carry" hidden>
+    <p>new to sundial? iphones drop a link on the way through the app store, so copy this first. then in sundial, go to settings, stars, paste a link.</p>
+    <code id="link"></code>
+    <button class="button quiet" id="copy" type="button">copy the link</button>
+  </section>
+</main>
+<script>
+  // The token stays on this page. Nothing here loads from anywhere else, and the
+  // only places it goes are the app and your clipboard. Same pattern the rules
+  // hold a link to (StarLink.isToken).
+  var token = new URLSearchParams(location.search).get("t") || "";
+  if (/^[A-Za-z0-9_-]{16,64}$/.test(token)) {
+    var link = "https://sundialus.com/s/?t=" + token;
+    // Safari can't hand a universal link back to the app while it's already sitting
+    // on that link, so the button goes by the app's own scheme, as an invite's does.
+    var open = document.getElementById("open");
+    open.href = "sundial://star/" + token;
+    open.hidden = false;
+    document.getElementById("link").textContent = link;
+    document.getElementById("carry").hidden = false;
+    var copy = document.getElementById("copy");
+    copy.addEventListener("click", function () {
+      function done() {
+        copy.textContent = "copied ☀︎";
+        setTimeout(function () { copy.textContent = "copy the link"; }, 2000);
+      }
+      function byHand() {
+        var range = document.createRange();
+        range.selectNodeContents(document.getElementById("link"));
+        var picked = getSelection();
+        picked.removeAllRanges();
+        picked.addRange(range);
+      }
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(link).then(done, byHand);
+      } else {
+        byHand();
+      }
+    });
+  } else {
+    document.getElementById("title").textContent = "this link isn't right";
+    document.getElementById("about").textContent = "ask them to send it again. sundial is a little private app for the people you keep closest.";
+  }
+</script>
+</body>
+</html>

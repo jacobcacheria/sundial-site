@@ -11,6 +11,14 @@
           {
             "/": "/e/*",
             "comment": "The older pretty form, /e/<token>, still opens the app."
+          },
+          {
+            "/": "/s/*",
+            "comment": "A stars link opens somebody's page in Sundial."
+          },
+          {
+            "/": "/s",
+            "comment": "The same, typed without its slash."
           }
         ]
       }
